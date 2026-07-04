@@ -19,6 +19,7 @@ class Parser:
         self.current_command_arg1 = ""
         self.current_command_arg2 = -1
         self.line_num = 0
+        self.iteration_ended = False
 
         # Open file
         try:
@@ -38,16 +39,24 @@ class Parser:
     def advance(self) -> None:
         try:
             self.current_command = next(self.file).split('//')[0].strip()
+            if self.current_command[0] == "/" and self.current_command[1] == "/":
+                raise IndexError
             self.line_num += 1
 
             self.current_command_type = self.commandType()
             self.current_command_arg1 = self.arg1()
             self.current_command_arg2 = self.arg2()
+        except IndexError:
+            self.current_command = ""
+            self.current_command_type = ""
+            self.current_command_arg1 = ""
+            self.current_command_arg2 = -1
         except StopIteration:
             self.current_command = ""
             self.current_command_type = ""
             self.current_command_arg1 = ""
             self.current_command_arg2 = -1
+            self.iteration_ended = True
 
     # Return a constant representing the type of the current command.
     def commandType(self) -> CommandType: # type: ignore
@@ -110,8 +119,8 @@ class Parser:
     def arg2(self) -> int:
         if self.current_command == "":
             return -1
-        elif self.current_command_type == "C_PUSH" or self.current_command_type == "C_POP" or \
-             self.current_command_type == "C_FUNCTION" or self.current_command_type == "C_CALL":
+        elif self.current_command_type == CommandType("C_PUSH") or self.current_command_type == CommandType("C_POP") or \
+             self.current_command_type == CommandType("C_FUNCTION") or self.current_command_type == CommandType("C_CALL"):
             return int(self.current_command.split(" ")[2])
         else:
             return -1
@@ -139,9 +148,12 @@ def main():
     writer = CodeWriter("out/" + sys.argv[1] + ".asm")
     
     # Runs until file ends
-    while parser.advance() or parser.current_command != "":
-        print(parser.current_command)
-        print(parser.commandType())
+    while not parser.advance() and not parser.iteration_ended:
+        if parser.current_command != "":
+            print(parser.current_command)
+            print(parser.current_command_type)
+            print(parser.current_command_arg1)
+            print(parser.current_command_arg2, "\n")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
