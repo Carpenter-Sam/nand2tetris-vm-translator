@@ -15,7 +15,9 @@ class CommandType(Enum):
 class Parser:
     def __init__(self, filename: str):
         self.current_command = ""
-        self.file_iter = ""
+        self.current_command_type = ""
+        self.current_command_arg1 = ""
+        self.current_command_arg2 = ""
         self.line_num = 0
 
         # Open file
@@ -37,8 +39,15 @@ class Parser:
         try:
             self.current_command = next(self.file).split('//')[0].strip()
             self.line_num += 1
+
+            self.current_command_type = self.commandType()
+            self.current_command_arg1 = self.arg1()
+            self.current_command_arg2 = self.arg2()
         except StopIteration:
             self.current_command = ""
+            self.current_command_type = ""
+            self.current_command_arg1 = ""
+            self.current_command_arg2 = ""
 
     # Return a constant representing the type of the current command.
     def commandType(self) -> CommandType: # type: ignore
@@ -87,9 +96,14 @@ class Parser:
     # Return first argument of the current command.
     # If C_ARITHMETIC, the command itself (add, sub, etc.) is returned.
     # Not called if C_RETURN.
-    def arg1(self) -> str: # type: ignore
+    def arg1(self) -> str:
         # Parse and return argument.
-        pass
+        if self.current_command_type == CommandType("C_ARITHMETIC"):
+            return self.current_command.split(" ")[0]
+        elif self.current_command == "" or self.current_command_type == CommandType("C_RETURN"):
+            return ""
+        else:
+            return self.current_command.split(" ")[1]
 
     # Return second argument of the current command.
     # Only called if current command is C_PUSH, C_POP, C_FUNCTION, C_CALL.
