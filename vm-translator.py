@@ -17,7 +17,7 @@ class Parser:
         self.current_command = ""
         self.current_command_type = ""
         self.current_command_arg1 = ""
-        self.current_command_arg2 = ""
+        self.current_command_arg2 = -1
         self.line_num = 0
 
         # Open file
@@ -47,7 +47,7 @@ class Parser:
             self.current_command = ""
             self.current_command_type = ""
             self.current_command_arg1 = ""
-            self.current_command_arg2 = ""
+            self.current_command_arg2 = -1
 
     # Return a constant representing the type of the current command.
     def commandType(self) -> CommandType: # type: ignore
@@ -107,9 +107,14 @@ class Parser:
 
     # Return second argument of the current command.
     # Only called if current command is C_PUSH, C_POP, C_FUNCTION, C_CALL.
-    def arg2(self) -> int: # type: ignore
-        # Parse and return argument.
-        pass
+    def arg2(self) -> int:
+        if self.current_command == "":
+            return -1
+        elif self.current_command_type == "C_PUSH" or self.current_command_type == "C_POP" or \
+             self.current_command_type == "C_FUNCTION" or self.current_command_type == "C_CALL":
+            return int(self.current_command.split(" ")[2])
+        else:
+            return -1
 
 class CodeWriter:
     def __init__(self, filename: str):
