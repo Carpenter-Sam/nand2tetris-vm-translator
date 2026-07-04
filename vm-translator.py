@@ -17,10 +17,20 @@ class Parser:
         self.current_command = ""
 
         # Open file
+        try:
+            self.file = open(filename)
+        except(FileNotFoundError):
+            print("Error file not found: " + filename)
+            exit()
+
 
     def __del__(self):
         # Close file
-        pass
+        try:
+            self.file.close()
+        except AttributeError:
+            pass
+    
 
     # Are there any more lines left in the input?
     def hasMoreLines(self) -> bool: # type: ignore
@@ -69,7 +79,7 @@ class CodeWriter:
     
 def main():
     parser = Parser("in/" + sys.argv[1] + ".vm")
-    writer = Parser("out/" + sys.argv[1] + ".asm")
+    writer = CodeWriter("out/" + sys.argv[1] + ".asm")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
