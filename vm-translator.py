@@ -148,16 +148,27 @@ class CodeWriter:
 
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
-        print("push/pop")
-        
-    
+        if command == "push":
+            # addr=LCL+i
+            # *SP=*addr
+            # SP++
+            pass
+        elif command == "pull":
+            # addr=LCL+i
+            # SP--
+            # *addr=*SP
+            pass
+        else:
+            print(f"Incorrect command, should be push or pull: {command} {segment} {index}")
+            exit()   
+
 def main():
     parser = Parser("in/" + sys.argv[1] + ".vm")
     writer = CodeWriter("out/" + sys.argv[1] + ".asm")
     
     # Runs until file ends
     while not parser.advance() and not parser.iteration_ended:
-        print(parser.current_command_type, parser.current_command_type == CommandType.C_ARITHMETIC)
+        print(parser.current_command, parser.current_command_type == CommandType.C_ARITHMETIC)
         if parser.current_command == "":
             # print(parser.current_command)
             # print(parser.current_command_arg1)
