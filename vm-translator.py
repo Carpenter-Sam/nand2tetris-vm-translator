@@ -149,17 +149,40 @@ class CodeWriter:
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
         if command == "push":
-            # addr=LCL+i
+            # addr=SEGMENT+i
+            self.file.write(f"@{segment}\n")
+            self.file.write("D=M\n")
+            self.file.write(f"@{index}\n")
+            self.file.write("D=D+A\n")
+            self.file.write("@addr\n")
+            self.file.write("M=D\n")
             # *SP=*addr
+            self.file.write("@addr\n")
+            self.file.write("D=M\n")
+            self.file.write("@SP\n")
+            self.file.write("M=D\n")
             # SP++
+            self.file.write("@SP\n")
+            self.file.write("M=M+1\n")
             pass
-        elif command == "pull":
-            # addr=LCL+i
+        elif command == "pop":
+            # addr=SEGMENT+i
+            self.file.write(f"@{segment}\n")
+            self.file.write("D=M\n")
+            self.file.write(f"@{index}\n")
+            self.file.write("D=D+A\n")
+            self.file.write("@addr\n")
+            self.file.write("M=D\n")
             # SP--
+            self.file.write("@SP\n")
+            self.file.write("M=M-1\n")
             # *addr=*SP
-            pass
+            self.file.write("@SP\n")
+            self.file.write("D=M\n")
+            self.file.write("@addr\n")
+            self.file.write("M=D\n")
         else:
-            print(f"Incorrect command, should be push or pull: {command} {segment} {index}")
+            print(f"Incorrect command, should be push or pop: {command} {segment} {index}")
             exit()   
 
 def main():
