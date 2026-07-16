@@ -132,6 +132,8 @@ class CodeWriter:
         try:
             self.file = open(filename, "w")
             self.file_strict = filename_strict
+
+            self.eq = 0
         except:
             print("Error occured while creating/opening file: " + filename)
             exit()   
@@ -206,6 +208,27 @@ class CodeWriter:
         # SP++
         self.file.write("@SP\n")
         self.file.write("M=M+1\n")
+    
+    def eqArithmetic(self):
+        self.addOrSub(False) # subtract top two values
+
+        # SP--
+        self.file.write("@SP\n")
+        self.file.write("M=M-1\n")
+        # Pop result into D
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("D=M\n")
+
+        # pushes 0 if D == 0 (pop 2 and pop 1 are equal) else pushes 1
+        self.file.write(f"@{self.file_strict}Eq{self.eq}\n")
+        self.file.write("push constant 1\n")
+        self.file.write(f"@{self.file_strict}EqEND{self.eq}\n")
+        self.file.write("0;JMP\n")
+        self.file.write(f"({self.file_strict}Eq{self.eq})\n")
+        self.file.write("push constant 0\n")
+        self.file.write(f"({self.file_strict}EqEND{self.eq})\n")
+        self.eq += 1
 
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
