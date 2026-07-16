@@ -146,64 +146,13 @@ class CodeWriter:
     # Write to output arithmetically equivalent assembly.
     def writeArithmetic(self, command: str) -> None:
         if command == "add":
-            # SP--
-            self.file.write("@SP\n")
-            self.file.write("M=M-1\n")
-            # Pop first value
-            self.file.write("@SP\n")
-            self.file.write("A=M\n")
-            self.file.write("D=M\n")
-            # SP--
-            self.file.write("SP\n")
-            self.file.write("M=M-1\n")
-            # Add first value onto second value
-            self.file.write("A=M\n")
-            self.file.write("D=D+M\n")
-            self.file.write("M=D\n")
-            # SP++
-            self.file.write("@SP\n")
-            self.file.write("M=M+1\n")
+            self.addOrSub(True)
 
         elif command == "sub":
-            # SP--
-            self.file.write("@SP\n")
-            self.file.write("M=M-1\n")
-            # Pop first value
-            self.file.write("@SP\n")
-            self.file.write("A=M\n")
-            self.file.write("D=M\n")
-            # SP--
-            self.file.write("SP\n")
-            self.file.write("M=M-1\n")
-            # Subtract first value onto second value
-            self.file.write("A=M\n")
-            self.file.write("D=D-M\n")
-            self.file.write("M=D\n")
-            # SP++
-            self.file.write("@SP\n")
-            self.file.write("M=M+1\n")
+            self.addOrSub(False)
 
         elif command == "neg":
-            # SP--
-            self.file.write("@SP\n")
-            self.file.write("M=M-1\n")
-            # Pop first value
-            self.file.write("@SP\n")
-            self.file.write("A=M\n")
-            self.file.write("D=M\n")
-            # Subtract that value twice
-            self.file.write("A=D\n")
-            self.file.write("A=A-D\n")
-            self.file.write("A=A-D\n")
-            # Push back onto stack
-            self.file.write("D=A\n")
-            self.file.write("@0\n")
-            self.file.write("A=M\n")
-            self.file.write("M=D\n")
-            # SP++
-            self.file.write("@SP\n")
-            self.file.write("M=M+1\n")
-
+            pass
 
         elif command == "eq":
             # equal if you subtract them from one another and get zero
@@ -227,6 +176,28 @@ class CodeWriter:
         else:
             print(f"Incorrect line, should be a valid arithmetic command (add, sub, neg, eq, gt, lt, and, or, not): {command}")
             exit()  
+
+    def addOrSub(self, adding: bool):
+        # SP--
+        self.file.write("@SP\n")
+        self.file.write("M=M-1\n")
+        # Pop first value
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("D=M\n")
+        # SP--
+        self.file.write("SP\n")
+        self.file.write("M=M-1\n")
+        # Add/subtract first value onto second value
+        self.file.write("A=M\n")
+        if adding:
+            self.file.write("D=D+M\n")
+        else:
+            self.file.write("D=M-D\n")
+        self.file.write("M=D\n")
+        # SP++
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
 
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
