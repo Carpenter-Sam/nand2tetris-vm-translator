@@ -176,7 +176,7 @@ class CodeWriter:
             # greater than if you subtract them and the result is below zero
             self.eglArithmetic(command)
 
-        # and, or, not assume that the value(s) checked on the stack are boolean (0 = True or 1 = False)
+        # and, or, not assume that the value(s) checked on the stack are boolean (0 = False or 1 = True)
         elif command == "and": # due to the above assumption the and command is equivalent to eq
             self.andOrLogic("and")
 
@@ -223,7 +223,7 @@ class CodeWriter:
         self.file.write("A=M\n")
         self.file.write("D=M\n")
 
-        # pushes 0 if result is true else pushes 1
+        # pushes 1 if result is true else pushes 0
         self.file.write(f"@{self.file_strict}{type}{self.egl}\n")
         if type == "eq":
             self.file.write(f"D;JEQ\n")
@@ -231,11 +231,11 @@ class CodeWriter:
             self.file.write(f"D;JGT\n")
         elif type == "lt":
             self.file.write(f"D;JLT\n")
-        self.writePushPop("push", "constant", 1)
+        self.writePushPop("push", "constant", 0)
         self.file.write(f"@{self.file_strict}{type}END{self.egl}\n")
         self.file.write("0;JMP\n")
         self.file.write(f"({self.file_strict}{type}{self.egl})\n")
-        self.writePushPop("push", "constant", 0)
+        self.writePushPop("push", "constant", 1)
         self.file.write(f"({self.file_strict}{type}END{self.egl})\n")
         self.egl += 1
     
