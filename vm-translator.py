@@ -331,7 +331,7 @@ class CodeWriter:
             exit()   
     
     def lattAddr(self, translated_segment: str, index: int):
-        self.file.write("@{translated_segment}\n")
+        self.file.write(f"@{translated_segment}\n")
         self.file.write("D=M\n")
         self.file.write(f"@{index}\n")
         self.file.write("D=D+A\n")
