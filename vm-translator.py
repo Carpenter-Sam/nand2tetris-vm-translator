@@ -247,6 +247,13 @@ class CodeWriter:
                     return
                 case "static":
                     self.constantAddr(index)
+                case "temp":
+                    if index > 7:
+                        print(f"Out of bounds temp segment. There are only 8 temp segments (starts at temp 0): {command} {segment} {index}")
+                        exit() 
+                    self.tempAddr(index)
+                case "pointer":
+                    pass
                 case _:
                     print(f"Incorrect line, wrong segment: {command} {segment} {index}")
                     exit() 
@@ -284,6 +291,12 @@ class CodeWriter:
         self.file.write(f"@{self.file_strict}.{index}\n")
         self.file.write("D=A\n")
         self.file.write("addr\n")
+        self.file.write("M=D\n")
+    
+    def tempAddr(self, index: int):
+        self.file.write(f"@{index + 5}\n")
+        self.file.write("D=A\n")
+        self.file.write("@addr\n")
         self.file.write("M=D\n")
 
     # Pushes value at location @addr onto stack
