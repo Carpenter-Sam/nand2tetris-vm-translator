@@ -133,7 +133,7 @@ class CodeWriter:
             self.file = open(filename, "w")
             self.file_strict = filename_strict
 
-            self.eq = 0
+            self.egl = 0
         except:
             print("Error occured while creating/opening file: " + filename)
             exit()   
@@ -166,13 +166,15 @@ class CodeWriter:
 
         elif command == "eq":
             # equal if you subtract them from one another and get zero
-            self.eqArithmetic()
+            self.eglArithmetic(command)
 
         elif command == "gt":
-            pass
+            # greater than if you subtract them and the result is above zero
+            self.eglArithmetic(command)
 
         elif command == "lt":
-            pass
+            # greater than if you subtract them and the result is below zero
+            self.eglArithmetic(command)
 
         elif command == "and":
             pass
@@ -209,7 +211,7 @@ class CodeWriter:
         self.file.write("@SP\n")
         self.file.write("M=M+1\n")
     
-    def eqArithmetic(self):
+    def eglArithmetic(self, type: str):
         self.addOrSub(False) # subtract top two values
 
         # SP--
@@ -220,16 +222,21 @@ class CodeWriter:
         self.file.write("A=M\n")
         self.file.write("D=M\n")
 
-        # pushes 0 if D == 0 (pop 2 and pop 1 are equal) else pushes 1
-        self.file.write(f"@{self.file_strict}Eq{self.eq}\n")
-        self.file.write(f"D;JEQ\n")
+        # pushes 0 if result is true else pushes 1
+        self.file.write(f"@{self.file_strict}{type}{self.egl}\n")
+        if type == "eq":
+            self.file.write(f"D;JEQ\n")
+        elif type == "gt":
+            self.file.write(f"D;JGT\n")
+        elif type == "ls":
+            self.file.write(f"D;JLT\n")
         self.writePushPop("push", "constant", 1)
-        self.file.write(f"@{self.file_strict}EqEND{self.eq}\n")
+        self.file.write(f"@{self.file_strict}{type}END{self.egl}\n")
         self.file.write("0;JMP\n")
-        self.file.write(f"({self.file_strict}Eq{self.eq})\n")
+        self.file.write(f"({self.file_strict}Eq{self.egl})\n")
         self.writePushPop("push", "constant", 0)
-        self.file.write(f"({self.file_strict}EqEND{self.eq})\n")
-        self.eq += 1
+        self.file.write(f"({self.file_strict}{type}END{self.egl})\n")
+        self.egl += 1
 
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
