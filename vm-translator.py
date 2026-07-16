@@ -253,7 +253,14 @@ class CodeWriter:
                         exit() 
                     self.tempAddr(index)
                 case "pointer":
-                    pass
+                    if index != 0 and index != 1:
+                        print(f"Incorrect command, index must be 0 or 1 when referring to pointer segment: {command} {segment} {index}")
+                        exit() 
+                    # pointer 0 = THIS, pointer 1 = THAT
+                    if index == 0:
+                        self.lattAddr("THIS", 0)
+                    elif index == 1:
+                        self.lattAddr("THAT", 0)
                 case _:
                     print(f"Incorrect line, wrong segment: {command} {segment} {index}")
                     exit() 
