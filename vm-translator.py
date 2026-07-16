@@ -416,22 +416,6 @@ class CodeWriter:
         self.file.write("@addr\n")
         self.file.write("A=M\n")
         self.file.write("M=D\n")
-    
-    # def translateSegment(self, segment: str):
-    #     match segment:
-    #         case "SP":
-    #             return 0
-    #         case "local":
-    #             return 1
-    #         case "argument":
-    #             return 2
-    #         case "this":
-    #             return 3
-    #         case "that":
-    #             return 4
-    #         case _:
-    #             print(f"Incorrect usage, should be a valid segment (SP, local, argument, this, that): {segment}")
-    #             exit()   
         
 
 def main():
