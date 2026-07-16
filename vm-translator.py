@@ -176,7 +176,7 @@ class CodeWriter:
             # greater than if you subtract them and the result is below zero
             self.eglArithmetic(command)
 
-        # and, or, not assume that the value(s) checked on the stack are boolean (0 = False or 1 = True)
+        # and, or, not assume that the value(s) checked on the stack are boolean (0 = False or -1 = True)
         elif command == "and": # due to the above assumption the and command is equivalent to eq
             self.andOrLogic("and")
 
@@ -187,18 +187,10 @@ class CodeWriter:
             # SP--
             self.file.write("@SP\n")
             self.file.write("M=M-1\n")
-            # Pop value
-            self.file.write("@SP\n")
+            # Not value
+            self.file.write("@0\n")
             self.file.write("A=M\n")
-            self.file.write("D=M\n")
-            # Invert value
-            self.file.write("D=-D\n")
-            # Add 1 to value
-            self.file.write("D=D+1\n")
-            # Push value
-            self.file.write("@SP\n")
-            self.file.write("A=M\n")
-            self.file.write("M=D\n")
+            self.file.write("M=!M\n")
             # SP++
             self.file.write("@SP\n")
             self.file.write("M=M+1\n")
@@ -240,7 +232,7 @@ class CodeWriter:
         self.file.write("A=M\n")
         self.file.write("D=M\n")
 
-        # pushes 1 if result is true else pushes 0
+        # pushes -1 if result is true else pushes 0
         self.file.write(f"@{self.file_strict}{type}{self.egl}\n")
         if type == "eq":
             self.file.write(f"D;JEQ\n")
@@ -252,7 +244,7 @@ class CodeWriter:
         self.file.write(f"@{self.file_strict}{type}END{self.egl}\n")
         self.file.write("0;JMP\n")
         self.file.write(f"({self.file_strict}{type}{self.egl})\n")
-        self.writePushPop("push", "constant", 1)
+        self.writePushPop("push", "constant", -1)
         self.file.write(f"({self.file_strict}{type}END{self.egl})\n")
         self.egl += 1
     
@@ -340,7 +332,10 @@ class CodeWriter:
     
     def pushConstant(self, value: int): # Simply pushes constant
         # *SP = i
-        self.file.write(f"@{value}\n")
+        if value == -1:
+            self.file.write("A=-1\n")
+        else:
+            self.file.write(f"@{value}\n")
         self.file.write("D=A\n")
         self.file.write("@SP\n")
         self.file.write("A=M\n")
@@ -352,7 +347,7 @@ class CodeWriter:
     def constantAddr(self, index: int): # Puts location of constant into addr
         self.file.write(f"@{self.file_strict}.{index}\n")
         self.file.write("D=A\n")
-        self.file.write("addr\n")
+        self.file.write("@addr\n")
         self.file.write("M=D\n")
     
     def tempAddr(self, index: int):
@@ -410,7 +405,7 @@ def main():
     
     # Runs until file ends
     while not parser.advance() and not parser.iteration_ended:
-        print(parser.current_command, parser.current_command_type == CommandType.C_ARITHMETIC)
+        # print(parser.current_command, parser.current_command_type == CommandType.C_ARITHMETIC)
         if parser.current_command == "":
             # print(parser.current_command)
             # print(parser.current_command_arg1)
