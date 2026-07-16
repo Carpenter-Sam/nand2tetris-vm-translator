@@ -176,8 +176,9 @@ class CodeWriter:
             # greater than if you subtract them and the result is below zero
             self.eglArithmetic(command)
 
-        elif command == "and":
-            pass
+        # and, or, not assume that the value(s) checked on the stack are boolean (0 = True or 1 = False)
+        elif command == "and": # due to the above assumption the and command is equivalent to eq
+            self.eglArithmetic("eq")
 
         elif command == "or":
             pass
@@ -237,6 +238,34 @@ class CodeWriter:
         self.writePushPop("push", "constant", 0)
         self.file.write(f"({self.file_strict}{type}END{self.egl})\n")
         self.egl += 1
+    
+    def andOrLogic(self, type: str):
+        # SP--
+        self.file.write("@SP\n")
+        self.file.write("M=M-1\n")
+        # Store in D
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("D=M\n")
+        # SP--
+        self.file.write("@SP\n")
+        self.file.write("M=M-1\n")
+        # Store in A
+        self.file.write("A=M\n")
+        self.file.write("A=M\n")
+        # D=D|A or D=D&A
+        if type == "and":
+            self.file.write("D=D&A\n")
+        else:
+            self.file.write("D=D|A\n")
+        # Store in SP
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        # SP++
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+        pass
 
     # Write to output logically equivalent push/pop command.
     def writePushPop(self, command:str, segment: str, index: int) -> None:
