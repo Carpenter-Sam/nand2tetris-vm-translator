@@ -127,10 +127,11 @@ class Parser:
             return -1
 
 class CodeWriter:
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, filename_strict: str):
         # Open file
         try:
             self.file = open(filename, "w")
+            self.file_strict = filename_strict
         except:
             print("Error occured while creating/opening file: " + filename)
             exit()   
@@ -238,6 +239,14 @@ class CodeWriter:
                     self.lattAddr("THIS", index)
                 case "that":
                     self.lattAddr("THAT", index)
+                case "constant":
+                    if command == "pop":
+                        print(f"Incorrect line, cannot pop a constant: {command} {segment} {index}")
+                        exit()
+                    self.pushConstant(index)
+                    return
+                case "static":
+                    self.constantAddr(index)
                 case _:
                     print(f"Incorrect line, wrong segment: {command} {segment} {index}")
                     exit() 
@@ -258,6 +267,23 @@ class CodeWriter:
         self.file.write(f"@{index}\n")
         self.file.write("D=D+A\n")
         self.file.write("@addr\n")
+        self.file.write("M=D\n")
+    
+    def pushConstant(self, value: int): # Simply pushes constant
+        # *SP = i
+        self.file.write("@{int}\n")
+        self.file.write("D=A\n")
+        self.file.write("@SP\n")
+        self.file.write("A=M\n")
+        self.file.write("M=D\n")
+        # SP++
+        self.file.write("@SP\n")
+        self.file.write("M=M+1\n")
+    
+    def constantAddr(self, index: int): # Puts location of constant into addr
+        self.file.write(f"@{self.file_strict}.{index}\n")
+        self.file.write("D=A\n")
+        self.file.write("addr\n")
         self.file.write("M=D\n")
 
     # Pushes value at location @addr onto stack
@@ -305,7 +331,7 @@ class CodeWriter:
 
 def main():
     parser = Parser("in/" + sys.argv[1] + ".vm")
-    writer = CodeWriter("out/" + sys.argv[1] + ".asm")
+    writer = CodeWriter("out/" + sys.argv[1] + ".asm", sys.argv[1])
     
     # Runs until file ends
     while not parser.advance() and not parser.iteration_ended:
